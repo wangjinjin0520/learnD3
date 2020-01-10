@@ -184,7 +184,7 @@ function update(source) {
     })
     .on("mouseover", function (d) {
       d3.select(this).style("stroke", "orange");
-      console.log(this);
+      // console.log(this);
       d3.select(this).style("stroke", "orange");
     })
     .on("mouseout", function (d) {
@@ -262,8 +262,7 @@ function update(source) {
     d.x0 = d.x;
     d.y0 = d.y;
   });
-
-// 添加贝塞尔曲线的path，衔接与父节点和子节点间
+  // 当点击时，切换children，同时用_children来保存原子节点信息
   function click(d) {
     if (d.children) {
       d._children = d.children;
@@ -298,6 +297,7 @@ var zoom = d3
     return !isWheelEvent || (isWheelEvent && d3.event.shiftKey);
   })
   .on("zoom", () => {
+    console.log("ss");
     // 子group元素将响应zoom事件，并更新transform状态
     view.attr(
       "transform",
@@ -349,40 +349,12 @@ function updateChart(source) {
     (getMax(root) / 12 || 0.5);
   // 定义Tree层级，并设置宽高
   var treemap = d3.tree().size([height * scale, width]);
-  // 设置节点的x、y位置信息
-  var treeData = treemap(root);
-
-  // 计算新的Tree层级
-  var nodes = treeData.descendants(),
-    links = treeData.descendants().slice(1);
-
-  // 设置每个同级节点间的y间距为180
-  nodes.forEach(function (d) {
-    d.y = d.depth * 180;
-  });
-
-  // node交互和绘制
-  updateNodes(source, nodes);
-  // link交互和绘制
-  updateLinks(source, links);
-
-  // 为动画过渡保存旧的位置
-  nodes.forEach(function (d) {
-    d.x0 = d.x;
-    d.y0 = d.y;
-  });
-
+  // 其他处理
 }
-
-/*
-*
-* 连接边的处理
-* */
-
 
 //添加曲线（修正过的方向）
 function diagonalReverse(s = {}, d = {}) {
-  console.log(s, d);
+  // console.log(s, d);
   path = `M ${d.y} ${d.x}
                   C ${(s.y + d.y) / 2} ${d.x},
                   ${(s.y + d.y) / 2} ${s.x},
