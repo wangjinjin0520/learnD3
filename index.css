@@ -1,0 +1,40 @@
+
+.node circle {
+  fill: #56E39F;
+  stroke: #56E39F;
+  stroke-width: 3px;
+}
+
+.node text {
+  font: 12px sans-serif;
+}
+
+.link {
+  fill: none;
+  stroke: #ccc;
+  stroke-width: 2px;
+}
+.chartTooltip {
+  position: absolute;
+  width: 200px;
+  height: auto;
+  padding: 10px;
+  box-sizing: border-box;
+  background-color: white;
+  border-radius: 5px;
+  box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.4);
+  pointer-events: none;
+}
+.chartTooltip.hidden {
+  display: none;
+}
+.chartTooltip p {
+  margin: 0;
+  font-size: 14px;
+  line-height: 20px;
+  word-wrap: break-word;
+}
+.thumb{
+  width: 100%;
+  height: 100%;
+}

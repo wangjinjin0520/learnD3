@@ -92,9 +92,9 @@ function update(source) {
         .style("left", xPosition + "px")
         .style("top", yPosition + "px");
       // 更新浮层内容
-      chartTooltip.select(".name").text(d.data.name);
+      // chartTooltip.select(".name").text(d.data.name);
       //   console.log(`./${d.data.imgSrc}`);
-      // chartTooltip.select(".name").html("<img src='pic.jpg' alt='img'>");
+      chartTooltip.select(".name").html("<img src='pic.jpg' alt='img' class='thumb'>");
       // 移除浮层hidden样式，展示浮层
       chartTooltip.classed("hidden", false);
     })
@@ -172,37 +172,91 @@ function update(source) {
   var link = svg.selectAll("path.link").data(links, function (d) {
     return d.id;
   });
-// 添加enter操作，添加类名为link的path元素
+
+  // 添加enter操作，添加类名为link的path元素
   var linkEnter = link
     .enter()
     .insert("path", "g")
     .attr("class", "link")
+    // 添加id
+    .attr("id", d => {
+      return "textPath" + d.id;
+    })
+    .on("mouseover", function (d) {
+      d3.select(this).style("stroke", "orange");
+      console.log(this);
+      d3.select(this).style("stroke", "orange");
+    })
+    .on("mouseout", function (d) {
+      d3.select(this).style("stroke", "#CCC");
+    })
+    .on("click", d => {
+      alert(d.parent.data.name + ' -> ' + d.data.name);
+    })
     // 默认位置为当前父节点的位置
     .attr("d", function (d) {
-      var o = {x: source.x0, y: source.y0};
-      return diagonal(o, o);
+      var o = {
+        x: source.x0,
+        y: source.y0
+      };
+      return diagonalReverse(o, o);
     });
-// 获取update集
+
+  // enter操作中，添加text，同时添加与path匹配的textPath
+  link
+    .enter()
+    .append("text")
+    // 给text添加textPath元素
+    .append("textPath")
+    // 给textPath设置path的引用
+    .attr("xlink:href", d => {
+      return "#textPath" + d.id;
+    })
+    // 字体居中
+    .style("text-anchor", "middle")
+    .attr("startOffset", "50%")
+    // 父节点的name
+    .style("fill", "red")
+    .text(function (d) {
+      return d.parent.id;
+    })
+    .append("tspan")
+    .style("fill", "blue")
+    .text(' --> ')
+    // 子节点的name
+    .append("tspan")
+    .style("fill", "red")
+    .text(function (d) {
+      return d.id;
+    });
+
+  // 获取update集
   var linkUpdate = linkEnter.merge(link);
-// 更新添加过渡动画
+
+  // 更新添加过渡动画
   linkUpdate
     .transition()
     .duration(duration)
     .attr("d", function (d) {
-      return diagonal(d, d.parent);
+      return diagonalReverse(d, d.parent);
     });
-// 获取exit集
+
+  // 获取exit集
   var linkExit = link
     .exit()
     // 设置过渡动画
     .transition()
     .duration(duration)
     .attr("d", function (d) {
-      var o = {x: source.x, y: source.y};
-      return diagonal(o, o);
+      var o = {
+        x: source.x,
+        y: source.y
+      };
+      return diagonalReverse(o, o);
     })
     // 移除link
     .remove();
+
 // 为动画过渡保存旧的位置
   nodes.forEach(function (d) {
     d.x0 = d.x;
@@ -210,15 +264,6 @@ function update(source) {
   });
 
 // 添加贝塞尔曲线的path，衔接与父节点和子节点间
-  function diagonal(s, d) {
-    path = `M ${s.y} ${s.x}
-            C ${(s.y + d.y) / 2} ${s.x},
-              ${(s.y + d.y) / 2} ${d.x},
-              ${d.y} ${d.x}`;
-    return path;
-  }
-
-// 当点击时，切换children，同时用_children来保存原子节点信息
   function click(d) {
     if (d.children) {
       d._children = d.children;
@@ -299,11 +344,48 @@ function getDepth(obj) {
 
 function updateChart(source) {
   // 大致计算需要放大的倍数
-  var scale = (getDepth(root) / 8 || 0.5) + (getMax(root) / 12 || 0.5);
+  var scale =
+    (getDepth(root) / 8 || 0.5) +
+    (getMax(root) / 12 || 0.5);
   // 定义Tree层级，并设置宽高
   var treemap = d3.tree().size([height * scale, width]);
-  // 其他处理
+  // 设置节点的x、y位置信息
+  var treeData = treemap(root);
+
+  // 计算新的Tree层级
+  var nodes = treeData.descendants(),
+    links = treeData.descendants().slice(1);
+
+  // 设置每个同级节点间的y间距为180
+  nodes.forEach(function (d) {
+    d.y = d.depth * 180;
+  });
+
+  // node交互和绘制
+  updateNodes(source, nodes);
+  // link交互和绘制
+  updateLinks(source, links);
+
+  // 为动画过渡保存旧的位置
+  nodes.forEach(function (d) {
+    d.x0 = d.x;
+    d.y0 = d.y;
+  });
+
 }
 
+/*
+*
+* 连接边的处理
+* */
 
 
+//添加曲线（修正过的方向）
+function diagonalReverse(s = {}, d = {}) {
+  console.log(s, d);
+  path = `M ${d.y} ${d.x}
+                  C ${(s.y + d.y) / 2} ${d.x},
+                  ${(s.y + d.y) / 2} ${s.x},
+                  ${s.y} ${s.x}`;
+  return path;
+}
