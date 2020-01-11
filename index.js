@@ -297,7 +297,7 @@ var zoom = d3
     return !isWheelEvent || (isWheelEvent && d3.event.shiftKey);
   })
   .on("zoom", () => {
-    console.log("ss");
+    console.log(d3.event.transform.x + margin.left);
     // 子group元素将响应zoom事件，并更新transform状态
     view.attr(
       "transform",
