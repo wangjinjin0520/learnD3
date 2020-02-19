@@ -14,7 +14,7 @@
   stroke: #ccc;
   stroke-width: 2px;
 }
-.chartTooltip {
+#tooltip{
   position: absolute;
   width: 200px;
   height: auto;

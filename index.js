@@ -13,6 +13,9 @@ var treeData = {
     {name: "Level 2: B", imgSrc: 'pic.jpg',}
   ]
 };
+
+
+
 // 设置图表的宽高和Margin
 var margin = {top: 20, right: 90, bottom: 30, left: 90},
   width = 960 - margin.left - margin.right,
@@ -93,8 +96,8 @@ function update(source) {
         .style("top", yPosition + "px");
       // 更新浮层内容
       // chartTooltip.select(".name").text(d.data.name);
-      //   console.log(`./${d.data.imgSrc}`);
-      chartTooltip.select(".name").html("<img src='pic.jpg' alt='img' class='thumb'>");
+      //   console.log(`${d.data.imgSrc}`);
+      chartTooltip.select(".name").html(`<img src=${d.data.imgSrc} alt='img' class='thumb'>`);
       // 移除浮层hidden样式，展示浮层
       chartTooltip.classed("hidden", false);
     })
@@ -185,10 +188,11 @@ function update(source) {
     .on("mouseover", function (d) {
       d3.select(this).style("stroke", "orange");
       // console.log(this);
-      d3.select(this).style("stroke", "orange");
+      d3.select(this).style("stroke-width",'4px');
     })
     .on("mouseout", function (d) {
       d3.select(this).style("stroke", "#CCC");
+      d3.select(this).style("stroke-width",'2px');
     })
     .on("click", d => {
       alert(d.parent.data.name + ' -> ' + d.data.name);
@@ -228,7 +232,8 @@ function update(source) {
     .style("fill", "red")
     .text(function (d) {
       return d.id;
-    });
+    })
+
 
   // 获取update集
   var linkUpdate = linkEnter.merge(link);
@@ -297,9 +302,8 @@ var zoom = d3
     return !isWheelEvent || (isWheelEvent && d3.event.shiftKey);
   })
   .on("zoom", () => {
-    console.log(d3.event.transform.x + margin.left);
     // 子group元素将响应zoom事件，并更新transform状态
-    view.attr(
+    svg.attr(
       "transform",
       "translate(" +
       (d3.event.transform.x + margin.left) +
@@ -361,3 +365,5 @@ function diagonalReverse(s = {}, d = {}) {
                   ${s.y} ${s.x}`;
   return path;
 }
+
+/*****************marker******************/
